@@ -2,12 +2,14 @@ import React, { Component } from 'react';
 import DataStreamer, { ServerRespond } from './DataStreamer';
 import Graph from './Graph';
 import './App.css';
+import { clearInterval } from 'timers';
 
 /**
  * State declaration for <App />
  */
 interface IState {
   data: ServerRespond[],
+  showGraph: boolean,
 }
 
 /**
@@ -29,6 +31,7 @@ class App extends Component<{}, IState> {
    * Render Graph react component with state.data parse as property data
    */
   renderGraph() {
+    if (this.state.showGraph){
     return (<Graph data={this.state.data}/>)
   }
 
@@ -36,11 +39,18 @@ class App extends Component<{}, IState> {
    * Get new data from server and update the state with the new data
    */
   getDataFromServer() {
+    let loopVar = 0;  
+    const interval = setInterval(() => {
     DataStreamer.getData((serverResponds: ServerRespond[]) => {
       // Update the state by creating a new array of data that consists of
       // Previous data in the state and the new data from server
       this.setState({ data: [...this.state.data, ...serverResponds] });
     });
+    loopVar++;
+    if (loopVar > 1000) {
+      clearInterval(interval);
+    }
+  }, 100);
   }
 
   /**
